@@ -1,9 +1,42 @@
-name: sample-stack-template
-description: Uncomment and modify the sections to configure your own amazing stack.
+version: 0.1.0    
+
+name: Deploy a Wordpress site
+description: Integration of GitHub Action to deploy a Wordpress site
+
 branding:
   icon: bell # https://feathericons.com/
   color: blue # hex accepted
 
+inputs:                                                  # stack inputs
+    
+  - name: GITHUB_PAT
+    description: GitHub PAT with repo and workflow permissions
+    required: true
+    is-secret: true
+
+configs:
+  repo-metadata:
+    parameters:
+      description: 'Wordpress site deployment'
+      secrets: 
+      - name: GH_PAT
+        value: ${{inputs.GITHUB_PAT}}
+
+  branches:
+    - name: main
+      parameters:
+        enforce-admins: true
+
+  environments:
+    - name: development
+      parameters:
+        protected-branches: false
+        allowed-branch-rules:
+          - main
+          - releases/*
+
+init:
+  uses: "setup.yml"
 #-------------------------------------------------------------
 # All values needed to be provided/verified by the user should be defined as inputs.
 # Values can be provided using a values file (yaml/json/.env format) or from the UX.
