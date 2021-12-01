@@ -1,7 +1,7 @@
 version: 0.1.0    
 
 name: Deploy a Wordpress site
-description: Integration of GitHub Action to deploy a Wordpress site
+description: Stack for workflow for deployment of wordpress site
 
 branding:
   icon: bell # https://feathericons.com/
@@ -9,8 +9,8 @@ branding:
 
 inputs:                                                  # stack inputs
     
-  - name: GITHUB_PAT
-    description: GitHub PAT with repo and workflow permissions
+  - name: DEPLOY_KEY
+    description: Private SSH Key for deployment
     required: true
     is-secret: true
 
@@ -19,8 +19,8 @@ configs:
     parameters:
       description: 'Wordpress site deployment'
       secrets: 
-      - name: GH_PAT
-        value: ${{inputs.GITHUB_PAT}}
+      - name: DEPLOY_KEY
+        value: ${{inputs.DEPLOY_KEY}}
 
   branches:
     - name: main
