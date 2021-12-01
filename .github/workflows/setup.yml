@@ -1,26 +1,63 @@
-name: Create the files.
+name: Wordpress Deployment
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
-  stack-initialization:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: checkout the repo
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 12.x
+
+    - name: Install dependencies
+      run: |
+        composer install -o
+        npm install
+
+    - name: Build
+      run: npm run build
+    
+    - name: Sync
+      env:
+        dest: 'https://stacktesting.wordpress.com/'
+      run: |
+        echo "${{secrets.DEPLOY_KEY}}" > deploy_key
+        chmod 600 ./deploy_key
+        rsync -chav --delete \
+          -e 'ssh -i ./deploy_key -o StrictHostKeyChecking=no' \
+          --exclude /deploy_key \
+          --exclude /.git/ \
+          --exclude /.github/ \
+          --exclude /node_modules/ \
+          ./ ${{env.dest}}# name: Create the files.
+
+# on:
+#   workflow_dispatch:
+
+# jobs:
+#   stack-initialization:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: checkout the repo
+#         uses: actions/checkout@v2
       
-      - name: move the file
-        run: |
-          mkdir .github/stacks
-          mv ./instance-contents/new-stack.yml .github/stacks/stack.yml
-          mv ./instance-contents/README.md ./README.md
-          rm -r ./instance-contents
+#       - name: move the file
+#         run: |
+#           mkdir .github/stacks
+#           mv ./instance-contents/new-stack.yml .github/stacks/stack.yml
+#           mv ./instance-contents/README.md ./README.md
+#           rm -r ./instance-contents
       
-      - name: Commit files
-        run: |
-          git config --global user.name '${{github.actor}}'
-          git config --global user.email '${{github.actor}}@users.noreply.github.com'
-          git add -A
-          git commit -m "Added readme and stack template."
-          git push
+#       - name: Commit files
+#         run: |
+#           git config --global user.name '${{github.actor}}'
+#           git config --global user.email '${{github.actor}}@users.noreply.github.com'
+#           git add -A
+#           git commit -m "Added readme and stack template."
+#           git push
